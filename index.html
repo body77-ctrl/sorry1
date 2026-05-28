@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>أنا آسف يا حبيبتي 💕</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700;900&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ========== CSS VARIABLES ========== */
+    :root {
+      --rose:       #e8435a;
+      --rose-light: #ff7a92;
+      --rose-pale:  #ffe0e6;
+      --gold:       #c9a84c;
+      --gold-light: #f0d080;
+      --cream:      #fff8f0;
+      --dark:       #1a0a0f;
+      --text-main:  #3d1a24;
+      --text-soft:  #8a4a58;
+    }
+
+    /* ========== RESET & BASE ========== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%; height: 100%;
+      font-family: 'Tajawal', sans-serif;
+      background: var(--dark);
+      overflow: hidden;
+      cursor: default;
+    }
+
+    /* ========== PAGES CONTAINER ========== */
+    #app {
+      width: 100vw; height: 100vh;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .page {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.8s ease, transform 0.8s cubic-bezier(.77,0,.175,1);
+      transform: translateY(40px) scale(0.97);
+      will-change: opacity, transform;
+      padding: 2rem;
+    }
+
+    .page.active {
+      opacity: 1;
+      pointer-events: all;
+      transform: translateY(0) scale(1);
+    }
+
+    .page.exit {
+      opacity: 0;
+      transform: translateY(-40px) scale(0.97);
+      pointer-events: none;
+    }
+
+    /* ========== ANIMATED BACKGROUND ========== */
+    .bg-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .bg-canvas canvas { position: absolute; inset: 0; }
+
+    /* gradient layers */
+    .bg-layer {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 80%, rgba(232,67,90,0.25) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 20%, rgba(201,168,76,0.15) 0%, transparent 55%),
+        radial-gradient(ellipse 100% 100% at 50% 50%, rgba(26,10,15,1) 0%, rgba(26,10,15,0.8) 100%);
+      animation: bgPulse 8s ease-in-out infinite alternate;
+    }
+
+    @keyframes bgPulse {
+      0%   { opacity: 1; }
+      100% { opacity: 0.85; }
+    }
+
+    /* petals */
+    .petal {
+      position: fixed;
+      width: 12px; height: 18px;
+      background: linear-gradient(135deg, var(--rose), var(--rose-light));
+      border-radius: 50% 0 50% 0;
+      opacity: 0;
+      animation: petalFall linear infinite;
+      pointer-events: none;
+      z-index: 1;
+      filter: blur(0.4px);
+    }
+
+    @keyframes petalFall {
+      0%   { opacity: 0; transform: translateY(-30px) rotate(0deg); }
+      10%  { opacity: 0.7; }
+      90%  { opacity: 0.5; }
+      100% { opacity: 0; transform: translateY(110vh) rotate(720deg) translateX(50px); }
+    }
+
+    /* ========== CONTENT WRAPPERS ========== */
+    .content {
+      position: relative; z-index: 10;
+      text-align: center;
+      max-width: 600px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.4rem;
+    }
+
+    /* ========== DECORATIVE FRAME ========== */
+    .frame {
+      position: absolute;
+      inset: 0; z-index: 5;
+      pointer-events: none;
+    }
+
+    .frame svg {
+      width: 100%; height: 100%;
+    }
+
+    /* ========== TYPOGRAPHY ========== */
+    .title-big {
+      font-family: 'Scheherazade New', serif;
+      font-size: clamp(2rem, 6vw, 3.8rem);
+      font-weight: 700;
+      color: var(--cream);
+      line-height: 1.3;
+      text-shadow: 0 0 40px rgba(232,67,90,0.6), 0 2px 4px rgba(0,0,0,0.5);
+      animation: textGlow 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes textGlow {
+      0%   { text-shadow: 0 0 30px rgba(232,67,90,0.5), 0 2px 4px rgba(0,0,0,0.5); }
+      100% { text-shadow: 0 0 60px rgba(232,67,90,0.9), 0 0 100px rgba(232,67,90,0.3), 0 2px 4px rgba(0,0,0,0.5); }
+    }
+
+    .subtitle {
+      font-size: clamp(1rem, 3vw, 1.4rem);
+      color: var(--rose-pale);
+      font-weight: 300;
+      opacity: 0.85;
+      letter-spacing: 0.04em;
+    }
+
+    .body-text {
+      font-size: clamp(0.95rem, 2.5vw, 1.25rem);
+      color: rgba(255,240,245,0.88);
+      line-height: 1.9;
+      font-weight: 300;
+      max-width: 480px;
+    }
+
+    /* ========== HEART DIVIDER ========== */
+    .heart-divider {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      color: var(--rose);
+      font-size: 1.1rem;
+    }
+
+    .heart-divider span { color: var(--rose-light); font-size: 1.3rem; animation: heartBeat 1.4s ease-in-out infinite; }
+
+    @keyframes heartBeat {
+      0%, 100% { transform: scale(1); }
+      14%       { transform: scale(1.3); }
+      28%       { transform: scale(1); }
+      42%       { transform: scale(1.2); }
+    }
+
+    .heart-line {
+      width: 60px; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--rose), transparent);
+    }
+
+    /* ========== BUTTONS ========== */
+    .btn-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .arrow-hint {
+      font-size: 0.8rem;
+      color: var(--gold-light);
+      letter-spacing: 0.1em;
+      opacity: 0.7;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .arrow-hint .arr { animation: arrowBounce 1.2s ease-in-out infinite; display: inline-block; }
+    @keyframes arrowBounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(4px)} }
+
+    .btn-main {
+      position: relative;
+      padding: 0.85rem 2.8rem;
+      font-family: 'Tajawal', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--cream);
+      background: linear-gradient(135deg, var(--rose) 0%, #c2294a 100%);
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      letter-spacing: 0.06em;
+      box-shadow:
+        0 4px 20px rgba(232,67,90,0.45),
+        0 1px 0 rgba(255,255,255,0.15) inset;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .btn-main::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.18) 0%, transparent 60%);
+      border-radius: 50px;
+    }
+
+    .btn-main:hover {
+      transform: translateY(-3px) scale(1.04);
+      box-shadow: 0 8px 35px rgba(232,67,90,0.65), 0 1px 0 rgba(255,255,255,0.2) inset;
+    }
+
+    .btn-main:active { transform: translateY(0) scale(0.98); }
+
+    .btn-secondary {
+      padding: 0.7rem 2.2rem;
+      font-family: 'Tajawal', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--gold-light);
+      background: transparent;
+      border: 1.5px solid rgba(201,168,76,0.5);
+      border-radius: 50px;
+      cursor: pointer;
+      letter-spacing: 0.05em;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-secondary::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(201,168,76,0.12), transparent);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .btn-secondary:hover { border-color: var(--gold); color: var(--gold); }
+    .btn-secondary:hover::before { opacity: 1; }
+
+    /* ========== PHOTO FRAME ========== */
+    .photo-wrap {
+      position: relative;
+      width: min(220px, 50vw);
+      aspect-ratio: 1;
+      flex-shrink: 0;
+    }
+
+    .photo-frame {
+      width: 100%; height: 100%;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 3px solid transparent;
+      background:
+        linear-gradient(var(--dark), var(--dark)) padding-box,
+        linear-gradient(135deg, var(--rose), var(--gold), var(--rose-light)) border-box;
+      box-shadow:
+        0 0 0 6px rgba(232,67,90,0.1),
+        0 0 40px rgba(232,67,90,0.3),
+        0 0 80px rgba(232,67,90,0.15);
+      animation: photoFloat 4s ease-in-out infinite;
+    }
+
+    @keyframes photoFloat {
+      0%,100% { transform: translateY(0) rotate(0deg); }
+      50%      { transform: translateY(-10px) rotate(1deg); }
+    }
+
+    .photo-frame img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .photo-glow {
+      position: absolute;
+      inset: -15px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(232,67,90,0.2) 0%, transparent 70%);
+      animation: glowPulse 2.5s ease-in-out infinite alternate;
+    }
+
+    @keyframes glowPulse {
+      0%   { transform: scale(1);    opacity: 0.6; }
+      100% { transform: scale(1.12); opacity: 1;   }
+    }
+
+    .photo-ornament {
+      position: absolute;
+      width: 30px; height: 30px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.9rem;
+      box-shadow: 0 0 15px rgba(201,168,76,0.6);
+    }
+
+    .orn-tl { top: 0;    right: 0;  }
+    .orn-br { bottom: 0; left: 0;   animation-delay: 0.7s; }
+
+    /* ========== AUDIO PLAYER ========== */
+    .audio-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(232,67,90,0.25);
+      border-radius: 40px;
+      padding: 0.5rem 1.2rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .play-btn {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--rose), #c2294a);
+      border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 0.8rem;
+      box-shadow: 0 2px 12px rgba(232,67,90,0.5);
+      transition: transform 0.15s;
+      flex-shrink: 0;
+    }
+
+    .play-btn:hover { transform: scale(1.1); }
+
+    .wave-bars {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      height: 24px;
+    }
+
+    .wave-bar {
+      width: 3px;
+      background: var(--rose-light);
+      border-radius: 2px;
+      animation: waveAnim 1.2s ease-in-out infinite;
+    }
+
+    .wave-bar:nth-child(1) { animation-delay: 0.0s; height: 8px; }
+    .wave-bar:nth-child(2) { animation-delay: 0.1s; height: 16px; }
+    .wave-bar:nth-child(3) { animation-delay: 0.2s; height: 10px; }
+    .wave-bar:nth-child(4) { animation-delay: 0.3s; height: 20px; }
+    .wave-bar:nth-child(5) { animation-delay: 0.4s; height: 12px; }
+    .wave-bar:nth-child(6) { animation-delay: 0.5s; height: 18px; }
+    .wave-bar:nth-child(7) { animation-delay: 0.2s; height: 8px; }
+
+    .wave-bars.paused .wave-bar {
+      animation-play-state: paused;
+      height: 4px;
+    }
+
+    @keyframes waveAnim {
+      0%,100% { transform: scaleY(1); }
+      50%      { transform: scaleY(0.3); }
+    }
+
+    .song-label {
+      font-size: 0.78rem;
+      color: rgba(255,230,235,0.65);
+      white-space: nowrap;
+      max-width: 120px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ========== SPARKLE CURSOR ========== */
+    .sparkle {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--rose-light);
+      transform: translate(-50%,-50%);
+      animation: sparkleFade 0.8s forwards;
+    }
+
+    @keyframes sparkleFade {
+      0%   { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+      100% { opacity: 0; transform: translate(-50%,-50%) scale(0); }
+    }
+
+    /* ========== PAGE 1 specific ========== */
+    #page1 .title-big { font-size: clamp(1.6rem, 5vw, 3rem); }
+
+    /* ========== PROGRESS DOTS ========== */
+    .progress-dots {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 0.6rem;
+      z-index: 20;
+    }
+
+    .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      transition: all 0.4s ease;
+    }
+
+    .dot.active {
+      background: var(--rose);
+      transform: scale(1.3);
+      box-shadow: 0 0 8px var(--rose);
+    }
+
+    /* ========== FLOATING HEARTS ========== */
+    .float-hearts {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .fh {
+      position: absolute;
+      font-size: 1.2rem;
+      animation: floatUp linear infinite;
+      opacity: 0;
+    }
+
+    @keyframes floatUp {
+      0%   { opacity: 0; transform: translateY(0) scale(0.5); }
+      20%  { opacity: 0.8; }
+      80%  { opacity: 0.5; }
+      100% { opacity: 0; transform: translateY(-90vh) scale(1.2) rotate(20deg); }
+    }
+
+    /* ========== SCROLL INDICATOR ========== */
+    .scroll-hint {
+      position: fixed;
+      bottom: 5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255,200,210,0.4);
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
+      z-index: 20;
+      animation: fadeUpDown 2s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes fadeUpDown {
+      0%,100% { opacity: 0.3; transform: translateX(-50%) translateY(0); }
+      50%      { opacity: 0.7; transform: translateX(-50%) translateY(-4px); }
+    }
+
+    /* ========== PAGE 4 SPECIAL ========== */
+    #page4 .title-big {
+      background: linear-gradient(135deg, var(--cream), var(--gold-light), var(--rose-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 3s linear infinite;
+      background-size: 200% auto;
+    }
+
+    @keyframes shimmer {
+      0%   { background-position: 0% center; }
+      100% { background-position: 200% center; }
+    }
+
+    /* ========== CONFETTI ========== */
+    .confetti-piece {
+      position: fixed;
+      width: 8px; height: 8px;
+      border-radius: 2px;
+      pointer-events: none;
+      z-index: 9998;
+      animation: confettiFall linear forwards;
+    }
+
+    @keyframes confettiFall {
+      0%   { opacity: 1; transform: translateY(0) rotate(0deg); }
+      100% { opacity: 0; transform: translateY(100vh) rotate(720deg); }
+    }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 480px) {
+      .content { gap: 1rem; padding: 0 0.5rem; }
+      .photo-wrap { width: 160px; }
+    }
+
+    @media (max-height: 600px) {
+      .photo-wrap { width: 130px; }
+      .content { gap: 0.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- BACKGROUND -->
+<div class="bg-canvas">
+  <div class="bg-layer"></div>
+</div>
+
+<!-- FLOATING HEARTS -->
+<div class="float-hearts" id="floatHearts"></div>
+
+<!-- PROGRESS DOTS -->
+<div class="progress-dots" id="progressDots">
+  <div class="dot active"></div>
+  <div class="dot"></div>
+  <div class="dot"></div>
+  <div class="dot"></div>
+</div>
+
+<!-- APP -->
+<div id="app">
+
+  <!-- ======== PAGE 1 ======== -->
+  <div class="page active" id="page1">
+    <div class="content">
+
+      <div class="heart-divider">
+        <div class="heart-line"></div>
+        <span>♥</span>
+        <div class="heart-line"></div>
+      </div>
+
+      <h1 class="title-big" id="p1title">أنا آسف إني زعلتك<br>في يوم من الأيام</h1>
+
+      <p class="subtitle">كل يوم بدونك ابتسامة ناقصه</p>
+
+      <div class="btn-wrap">
+        <button class="btn-main" onclick="goTo(2)">💕 بحبك متزعليش مني</button>
+        <div class="arrow-hint"><span class="arr">↓</span> دوسي هنا</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ======== PAGE 2 ======== -->
+  <div class="page" id="page2">
+    <div class="content">
+
+      <!--
+        ★ الصورة الأولى
+        ضعي مسار الصورة بدل: images/photo1.jpg
+        مثال: images/photo1.jpg  أو  https://link-to-image.jpg
+      -->
+      <div class="photo-wrap" id="photo2wrap">
+        <div class="photo-glow"></div>
+        <div class="photo-frame">
+          <img src="images/photo1.jpg" alt="صورتي وأنا بفكر فيك" id="img2"
+               onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'220\' height=\'220\'%3E%3Ccircle cx=\'110\' cy=\'110\' r=\'110\' fill=\'%23e8435a33\'/%3E%3Ctext x=\'50%25\' y=\'55%25\' text-anchor=\'middle\' fill=\'%23ff7a92\' font-size=\'60\'%3E💕%3C/text%3E%3C/svg%3E'" />
+        </div>
+        <div class="photo-ornament orn-tl">💫</div>
+        <div class="photo-ornament orn-br">🌸</div>
+      </div>
+
+      <!--
+        ★ الأغنية الأولى
+        ضعي مسار الأغنية بدل: audio/song1.mp3
+      -->
+      <audio id="audio2" loop>
+        <source src="audio/song1.mp3" type="audio/mpeg" />
+      </audio>
+
+      <div class="audio-bar" onclick="toggleAudio('audio2', 'wave2')">
+        <button class="play-btn" id="playBtn2">▶</button>
+        <div class="wave-bars paused" id="wave2">
+          <div class="wave-bar"></div><div class="wave-bar"></div>
+          <div class="wave-bar"></div><div class="wave-bar"></div>
+          <div class="wave-bar"></div><div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+        </div>
+        <span class="song-label">🎵 اضغطي للتشغيل</span>
+      </div>
+
+      <p class="body-text">أنا آسف لو زعلتك في يوم يا حبيبتي<br>حقك عليا وأنا عارف</p>
+
+      <div class="btn-wrap">
+        <button class="btn-secondary" onclick="goTo(3)">خلاص بقا 🌸</button>
+        <div class="arrow-hint"><span class="arr">↓</span> دوسي هنا</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ======== PAGE 3 ======== -->
+  <div class="page" id="page3">
+    <div class="content">
+
+      <!--
+        ★ الصورة التانية
+        ضعي مسار الصورة بدل: images/photo2.jpg
+      -->
+      <div class="photo-wrap">
+        <div class="photo-glow"></div>
+        <div class="photo-frame">
+          <img src="images/photo2.jpg" alt="أحلى لحظه" id="img3"
+               onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'220\' height=\'220\'%3E%3Ccircle cx=\'110\' cy=\'110\' r=\'110\' fill=\'%23c9a84c33\'/%3E%3Ctext x=\'50%25\' y=\'55%25\' text-anchor=\'middle\' fill=\'%23f0d080\' font-size=\'60\'%3E🌸%3C/text%3E%3C/svg%3E'" />
+        </div>
+        <div class="photo-ornament orn-tl">✨</div>
+        <div class="photo-ornament orn-br">💖</div>
+      </div>
+
+      <!--
+        ★ الأغنية التانية
+        ضعي مسار الأغنية بدل: audio/song2.mp3
+      -->
+      <audio id="audio3" loop>
+        <source src="audio/song2.mp3" type="audio/mpeg" />
+      </audio>
+
+      <div class="audio-bar" onclick="toggleAudio('audio3', 'wave3')">
+        <button class="play-btn" id="playBtn3">▶</button>
+        <div class="wave-bars paused" id="wave3">
+          <div class="wave-bar"></div><div class="wave-bar"></div>
+          <div class="wave-bar"></div><div class="wave-bar"></div>
+          <div class="wave-bar"></div><div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+        </div>
+        <span class="song-label">🎵 اضغطي للتشغيل</span>
+      </div>
+
+      <p class="body-text">خلاص بقا صالحيني يا قمر<br>مش طايق أبعد عنك لحظة</p>
+
+      <div class="btn-wrap">
+        <button class="btn-main" onclick="goTo(4)">💕 بحبك</button>
+        <div class="arrow-hint"><span class="arr">↓</span> دوسي هنا يا أحلى حاجة خلقها ربنا</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ======== PAGE 4 ======== -->
+  <div class="page" id="page4">
+    <div class="content">
+
+      <!--
+        ★ الصورة التالتة
+        ضعي مسار الصورة بدل: images/photo3.jpg
+      -->
+      <div class="photo-wrap">
+        <div class="photo-glow"></div>
+        <div class="photo-frame">
+          <img src="images/photo3.jpg" alt="روحي وعمري" id="img4"
+               onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'220\' height=\'220\'%3E%3Ccircle cx=\'110\' cy=\'110\' r=\'110\' fill=\'%23e8435a55\'/%3E%3Ctext x=\'50%25\' y=\'55%25\' text-anchor=\'middle\' fill=\'%23ffe0e6\' font-size=\'60\'%3E👑%3C/text%3E%3C/svg%3E'" />
+        </div>
+        <div class="photo-ornament orn-tl">👑</div>
+        <div class="photo-ornament orn-br">💎</div>
+      </div>
+
+      <!--
+        ★ الأغنية التالتة
+        ضعي مسار الأغنية بدل: audio/song3.mp3
+      -->
+      <audio id="audio4" loop>
+        <source src="audio/song3.mp3" type="audio/mpeg" />
+      </audio>
+
+      <div class="audio-bar" onclick="toggleAudio('audio4', 'wave4')">
+        <button class="play-btn" id="playBtn4">▶</button>
+        <div class="wave-bars paused" id="wave4">
+          <div class="wave-bar"></div><div class="wave-bar"></div>
+          <div class="wave-bar"></div><div class="wave-bar"></div>
+          <div class="wave-bar"></div><div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+        </div>
+        <span class="song-label">🎵 اضغطي للتشغيل</span>
+      </div>
+
+      <h1 class="title-big">عمري ما أحب حد قدك</h1>
+      <p class="body-text">يا أحلى حاجة خلقها ربنا وفي حياتي 💕</p>
+
+    </div>
+  </div>
+
+</div><!-- end #app -->
+
+<script>
+  /* ============================================================
+     CONFIGURATION
+     ============================================================ */
+  const TOTAL_PAGES = 4;
+  let currentPage = 1;
+  let activeAudios = {};
+
+  /* ============================================================
+     PETAL GENERATOR
+     ============================================================ */
+  (function spawnPetals() {
+    for (let i = 0; i < 18; i++) {
+      const p = document.createElement('div');
+      p.className = 'petal';
+      p.style.left   = Math.random() * 100 + 'vw';
+      p.style.top    = '-30px';
+      p.style.animationDuration = (6 + Math.random() * 8) + 's';
+      p.style.animationDelay   = (Math.random() * 10) + 's';
+      p.style.width  = (8 + Math.random() * 10) + 'px';
+      p.style.height = (12 + Math.random() * 14) + 'px';
+      p.style.opacity = 0.4 + Math.random() * 0.4;
+      document.body.appendChild(p);
+    }
+  })();
+
+  /* ============================================================
+     FLOATING HEARTS
+     ============================================================ */
+  const heartsEl = document.getElementById('floatHearts');
+  const heartChars = ['💕','💖','💗','🌸','✨','💝','🌹'];
+
+  function spawnHeart() {
+    const h = document.createElement('div');
+    h.className = 'fh';
+    h.textContent = heartChars[Math.floor(Math.random() * heartChars.length)];
+    h.style.left = Math.random() * 100 + 'vw';
+    h.style.bottom = '-30px';
+    h.style.fontSize = (0.8 + Math.random() * 1.2) + 'rem';
+    h.style.animationDuration = (5 + Math.random() * 7) + 's';
+    h.style.animationDelay = '0s';
+    heartsEl.appendChild(h);
+    setTimeout(() => h.remove(), 12000);
+  }
+
+  setInterval(spawnHeart, 1200);
+
+  /* ============================================================
+     SPARKLE CURSOR
+     ============================================================ */
+  document.addEventListener('mousemove', (e) => {
+    if (Math.random() > 0.7) {
+      const s = document.createElement('div');
+      s.className = 'sparkle';
+      s.style.left = e.clientX + 'px';
+      s.style.top  = e.clientY + 'px';
+      const colors = ['#ff7a92','#f0d080','#ffe0e6','#e8435a'];
+      s.style.background = colors[Math.floor(Math.random() * colors.length)];
+      s.style.width  = (4 + Math.random() * 8) + 'px';
+      s.style.height = s.style.width;
+      document.body.appendChild(s);
+      setTimeout(() => s.remove(), 800);
+    }
+  });
+
+  /* ============================================================
+     AUDIO TOGGLE
+     ============================================================ */
+  function toggleAudio(audioId, waveId) {
+    const audio = document.getElementById(audioId);
+    const wave  = document.getElementById(waveId);
+    const btn   = audio.parentElement.querySelector('.play-btn') ||
+                  document.getElementById('playBtn' + audioId.replace('audio',''));
+
+    if (audio.paused) {
+      // pause all others
+      Object.keys(activeAudios).forEach(id => {
+        if (id !== audioId) {
+          activeAudios[id].audio.pause();
+          activeAudios[id].wave.classList.add('paused');
+          activeAudios[id].btn.textContent = '▶';
+        }
+      });
+      audio.play().catch(() => {});
+      wave.classList.remove('paused');
+      const playBtnEl = audio.nextElementSibling.querySelector('.play-btn');
+      if (playBtnEl) playBtnEl.textContent = '⏸';
+      activeAudios[audioId] = {
+        audio,
+        wave,
+        btn: playBtnEl || { textContent: '' }
+      };
+    } else {
+      audio.pause();
+      wave.classList.add('paused');
+      const playBtnEl = audio.nextElementSibling.querySelector('.play-btn');
+      if (playBtnEl) playBtnEl.textContent = '▶';
+    }
+  }
+
+  /* ============================================================
+     PAGE NAVIGATION
+     ============================================================ */
+  function goTo(num) {
+    if (num === currentPage) return;
+
+    // stop audio when leaving
+    const prevAudioId = 'audio' + (currentPage + 1); // page2 uses audio2, etc.
+    // (we keep audio playing across pages intentionally — romantic!)
+
+    const prevPage = document.getElementById('page' + currentPage);
+    const nextPage = document.getElementById('page' + num);
+
+    prevPage.classList.remove('active');
+    prevPage.classList.add('exit');
+
+    setTimeout(() => {
+      prevPage.classList.remove('exit');
+    }, 900);
+
+    setTimeout(() => {
+      nextPage.classList.add('active');
+    }, 200);
+
+    currentPage = num;
+    updateDots();
+
+    // confetti on last page
+    if (num === 4) launchConfetti();
+  }
+
+  /* ============================================================
+     PROGRESS DOTS
+     ============================================================ */
+  function updateDots() {
+    document.querySelectorAll('.dot').forEach((d, i) => {
+      d.classList.toggle('active', i + 1 === currentPage);
+    });
+  }
+
+  /* ============================================================
+     CONFETTI
+     ============================================================ */
+  function launchConfetti() {
+    const colors = ['#e8435a','#f0d080','#ffe0e6','#ff7a92','#c9a84c','#fff8f0'];
+    for (let i = 0; i < 80; i++) {
+      setTimeout(() => {
+        const c = document.createElement('div');
+        c.className = 'confetti-piece';
+        c.style.left = Math.random() * 100 + 'vw';
+        c.style.top  = '-10px';
+        c.style.background = colors[Math.floor(Math.random() * colors.length)];
+        c.style.width  = (5 + Math.random() * 8) + 'px';
+        c.style.height = c.style.width;
+        c.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+        c.style.animationDuration = (2 + Math.random() * 3) + 's';
+        document.body.appendChild(c);
+        setTimeout(() => c.remove(), 5000);
+      }, i * 40);
+    }
+  }
+
+  /* ============================================================
+     TOUCH SWIPE (mobile)
+     ============================================================ */
+  let touchStartY = 0;
+  document.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; });
+  document.addEventListener('touchend', e => {
+    const dy = touchStartY - e.changedTouches[0].clientY;
+    if (Math.abs(dy) > 60) {
+      if (dy > 0 && currentPage < TOTAL_PAGES) goTo(currentPage + 1);
+      if (dy < 0 && currentPage > 1)           goTo(currentPage - 1);
+    }
+  });
+
+  /* ============================================================
+     KEYBOARD NAVIGATION
+     ============================================================ */
+  document.addEventListener('keydown', e => {
+    if ((e.key === 'ArrowDown' || e.key === 'ArrowRight') && currentPage < TOTAL_PAGES)
+      goTo(currentPage + 1);
+    if ((e.key === 'ArrowUp' || e.key === 'ArrowLeft') && currentPage > 1)
+      goTo(currentPage - 1);
+  });
+</script>
+</body>
+</html>
